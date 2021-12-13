@@ -124,7 +124,7 @@ namespace AdventOfCode.Day4
 
         private List<int> GetDraws(IEnumerable<string> data)
         {
-            return data.First().Split(',').Select(x => (int)Convert.ChangeType(x, typeof(int))).ToList();
+            return data.First().Split(',').Select(int.Parse).ToList();
         }
 
         private List<int[,]> GetCards(IEnumerable<string> data)
@@ -148,7 +148,7 @@ namespace AdventOfCode.Day4
                     var columns = Regex.Split(dataRow.Trim(), @"\s+");
                     for (int col = 0; col < columns.Length; col++)
                     {
-                        var no = (int)Convert.ChangeType(columns[col], typeof(int));
+                        var no = int.Parse(columns[col]);
                         card[row, col] = no;
                     }
 
