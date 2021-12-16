@@ -38,13 +38,38 @@ namespace AdventOfCode.Day9
             _testOutputHelper.WriteLine(riskLevel.ToString());
         }
 
+        [Fact]
+        public void Test2()
+        {
+            var data = FileUtil.ParseRecords<string>("input.txt").ToList();
+
+            var map = new Map(data);
+
+            var basinSizes = new List<int>();
+            
+            for (var row = 0; row < map.Rows; row++)
+            {
+                for (var col = 0; col < map.Cols; col++)
+                {
+                    if (map.IsLowPoint(row, col))
+                    {
+                        var basinSize = map.GetBasinSize(row, col);
+                        basinSizes.Add(basinSize);
+                    }
+                }
+            }
+
+            var top3 = basinSizes.OrderByDescending(x => x).Take(3).ToList();
+            _testOutputHelper.WriteLine($"{top3[0] * top3[1] * top3[2]}");
+        }
+        
         public class Map
         {
             private readonly int[,] _map;
 
-            public int Rows { get; set; }
+            public int Rows { get; }
 
-            public int Cols { get; set; }
+            public int Cols { get;  }
 
             public Map(IList<string> data)
             {
@@ -67,8 +92,7 @@ namespace AdventOfCode.Day9
             public bool IsLowPoint(int row, int col)
             {
                 int currentHeight = _map[row, col];
-
-
+                
                 if (row > 0)
                 {
                     if (currentHeight >= _map[row - 1, col]) return false;
@@ -90,6 +114,44 @@ namespace AdventOfCode.Day9
                 }
 
                 return true;
+            }
+
+            public int GetBasinSize(int row, int col)
+            {
+                var trackedLocations = new bool[Rows, Cols];
+                
+                trackedLocations[row, col] = true;
+
+                return CalculateBasinSize(ref trackedLocations, row, col);
+            }
+
+            private int CalculateBasinSize(ref bool[,] trackedLocations, int row, int col)
+            {
+                int basinSize = 1;
+
+                trackedLocations[row, col] = true;
+                
+                if (col > 0 && _map[row, col - 1] < 9 && !trackedLocations[row, col - 1])
+                {
+                    basinSize += CalculateBasinSize(ref trackedLocations, row , col - 1);
+                }
+
+                if (row > 0 && _map[row - 1, col] < 9  && !trackedLocations[row -1 , col])
+                {
+                    basinSize += CalculateBasinSize(ref trackedLocations,row - 1 , col);
+                }
+                
+                if (row < Rows - 1 && _map[row + 1, col] < 9  && !trackedLocations[row + 1, col])
+                {
+                    basinSize += CalculateBasinSize(ref trackedLocations,row + 1 , col);
+                }
+                
+                if (col < Cols - 1 && _map[row, col + 1] < 9  && !trackedLocations[row , col + 1])
+                {
+                    basinSize += CalculateBasinSize(ref trackedLocations,row  , col + 1);
+                }
+                
+                return basinSize;
             }
         }
     }
