@@ -131,21 +131,25 @@ namespace AdventOfCode.Day9
 
                 trackedLocations[row, col] = true;
                 
+                // move left
                 if (col > 0 && _map[row, col - 1] < 9 && !trackedLocations[row, col - 1])
                 {
                     basinSize += CalculateBasinSize(ref trackedLocations, row , col - 1);
                 }
 
+                // move up
                 if (row > 0 && _map[row - 1, col] < 9  && !trackedLocations[row -1 , col])
                 {
                     basinSize += CalculateBasinSize(ref trackedLocations,row - 1 , col);
                 }
                 
+                // move down
                 if (row < Rows - 1 && _map[row + 1, col] < 9  && !trackedLocations[row + 1, col])
                 {
                     basinSize += CalculateBasinSize(ref trackedLocations,row + 1 , col);
                 }
                 
+                // move right
                 if (col < Cols - 1 && _map[row, col + 1] < 9  && !trackedLocations[row , col + 1])
                 {
                     basinSize += CalculateBasinSize(ref trackedLocations,row  , col + 1);
