@@ -21,38 +21,40 @@ namespace AdventOfCode.Day11
         {
             var data = FileUtil.ParseRecords<string>("input.txt");
             int gridSize = data.Count;
-
             var grid = new int[gridSize, gridSize];
 
-            for (var row = 0; row < gridSize; row++)
+            void UpdateGrid(Func<int, int, int> func)
             {
-                for (var col = 0; col < gridSize; col++)
-                {
-                    grid[row, col] = int.Parse(data[row][col].ToString());
-                }
-            }
-
-            int totalFlashes = 0;
-
-            var flashedThisStep = new List<Tuple<int, int>>();
-
-            for (var step = 1; step <= 100; step++)
-            {
-                flashedThisStep.Clear();
-
                 for (var row = 0; row < gridSize; row++)
                 {
                     for (var col = 0; col < gridSize; col++)
                     {
-                        grid[row, col]++;
+                        grid[row, col] = func(row, col);
                     }
                 }
+            }
+
+            UpdateGrid((r, c) => int.Parse(data[r][c].ToString()));
+
+            var totalFlashes = 0;
+
+            var flashedThisStep = new List<Tuple<int, int>>();
+
+            const int stepToCheck = 100;
+            bool foundAnswerToPart1 = false, foundAnswerToPart2 = false;
+
+            for (var step = 1; !foundAnswerToPart1 || !foundAnswerToPart2; step++)
+            {
+                flashedThisStep.Clear();
+
+                UpdateGrid((r, c) => grid[r, c] + 1);
 
                 var flashedThisEvaluation = new List<Tuple<int, int>>();
 
                 do
                 {
                     flashedThisEvaluation.Clear();
+
                     for (var row = 0; row < gridSize; row++)
                     {
                         for (var col = 0; col < gridSize; col++)
@@ -118,41 +120,20 @@ namespace AdventOfCode.Day11
                     }
                 } while (flashedThisEvaluation.Any());
 
-                for (var row = 0; row < gridSize; row++)
-                {
-                    for (var col = 0; col < gridSize; col++)
-                    {
-                        if (grid[row, col] > 9)
-                        {
-                            grid[row, col] = 0;
-                        }
-                    }
-                }
-            }
+                UpdateGrid((r, c) => grid[r, c] > 9 ? 0 : grid[r, c]);
 
-            _testOutputHelper.WriteLine(totalFlashes.ToString());
-        }
-
-        private void WriteGrid(int gridSize, int[,] grid)
-        {
-            for (var row = 0; row < gridSize; row++)
-            {
-                var line = string.Empty;
-                for (var col = 0; col < gridSize; col++)
+                if (step == stepToCheck)
                 {
-                    line = line + grid[row, col];
+                    _testOutputHelper.WriteLine($"Flashes after step {step}: {totalFlashes}");
+                    foundAnswerToPart1 = true;
                 }
 
-                _testOutputHelper.WriteLine(line);
+                if (flashedThisStep.Count == gridSize * gridSize)
+                {
+                    _testOutputHelper.WriteLine($"Synchronised on step {step}");
+                    foundAnswerToPart2 = true;
+                }
             }
         }
-
-        // for each cycle
-        //   increase every octopus energy level by 1
-        //   while any octopuses have an energy level of 10
-        //     boost surrounding octopus energy levels by 1
-        //   count all octopuses with an energy level greater than 9
-        //   add to the total number of flashes
-        //   reset all octopuses with an energy level greater than 9 to 0
     }
 }
