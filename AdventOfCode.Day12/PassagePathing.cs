@@ -15,8 +15,10 @@ namespace AdventOfCode.Day12
             _testOutputHelper = testOutputHelper;
         }
 
-        [Fact]
-        public void Test1()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void Test1(bool allowMultipleSmallCaveVisits)
         {
             var data = FileUtil.ParseRecords<string>("input.txt").ToList();
             var caveMap = new Dictionary<string, HashSet<string>>();
@@ -41,7 +43,7 @@ namespace AdventOfCode.Day12
 
             do
             {
-                numberOfRoutes += CheckRoute(caveMap, currentCave, path);
+                numberOfRoutes += CheckRoute(caveMap, currentCave, path, allowMultipleSmallCaveVisits);
             } while (path.Any());
 
             _testOutputHelper.WriteLine(numberOfRoutes.ToString());
@@ -51,7 +53,8 @@ namespace AdventOfCode.Day12
         private int CheckRoute(
             Dictionary<string, HashSet<string>> caveMap,
             HashSet<string> currentCave,
-            Stack<string> path)
+            Stack<string> path, 
+            bool allowMultipleCaveVisits)
         {
             var routesThisPath = 0;
 
@@ -61,16 +64,53 @@ namespace AdventOfCode.Day12
                 {
                     routesThisPath++;
                 }
-                else if (destination.All(char.IsUpper) || !path.Contains(destination))
+                else if (CanVisit(path, destination, allowMultipleCaveVisits))
                 {
                     path.Push(destination);
-                    routesThisPath += CheckRoute(caveMap, caveMap[destination], path);
+                    routesThisPath += CheckRoute(caveMap, caveMap[destination], path, allowMultipleCaveVisits);
                 }
             }
 
             path.Pop();
             
             return routesThisPath;
+        }
+
+        private static bool CanVisit(Stack<string> path, string destination, bool allowMultipleSmallCaveVisits)
+        {
+            if (destination == "start")
+            {
+                return false;
+            }
+
+            if (!path.Contains(destination))
+            {
+                return true;
+            }
+
+            if (destination.All(char.IsUpper))
+            {
+                return true;
+            }
+
+            if (allowMultipleSmallCaveVisits)
+            {
+                var anySmallCavesVisitedMoreThanOnce = path
+                    .Where(x => x.All(char.IsLower))
+                    .GroupBy(x => x)
+                    .Select(x => new
+                    {
+                        x.Key,
+                        Count = x.Count()
+                    })
+                    .Any(x => x.Count > 1);
+
+                return !anySmallCavesVisitedMoreThanOnce;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
