@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -52,7 +51,7 @@ namespace AdventOfCode.Day13
 
                 if (axis == "x")
                 {
-                    var offset = 0;
+                    var foldToIndex = 0;
 
                     for (var col = colLength; col > length; col--)
                     {
@@ -60,12 +59,12 @@ namespace AdventOfCode.Day13
                         {
                             if (paper[row, col] == '#')
                             {
-                                paper[row, offset] = paper[row, col];
+                                paper[row, foldToIndex] = paper[row, col];
                                 paper[row, col] = ' ';
                             }
                         }
                         
-                        offset++;
+                        foldToIndex++;
                     }
                     
                     colLength -= length + 1;
@@ -73,7 +72,7 @@ namespace AdventOfCode.Day13
 
                 if (axis == "y")
                 {
-                    var offset = 0;
+                    var foldToIndex = 0;
                     
                     for (var row = rowLength; row > length; row--)
                     {
@@ -81,12 +80,12 @@ namespace AdventOfCode.Day13
                         {
                             if (paper[row, col] == '#')
                             {
-                                paper[offset, col] = paper[row, col];    
+                                paper[foldToIndex, col] = paper[row, col];    
                                 paper[row, col] = ' ';
                             }
                         }
 
-                        offset++;
+                        foldToIndex++;
                     }
 
                     rowLength -= length + 1;
@@ -100,6 +99,8 @@ namespace AdventOfCode.Day13
 
                 isFirstFold = false;
             }
+            
+            ShowGrid(paper, rowLength, colLength);
         }
 
         private static IEnumerable<char> Flatten(char[,] paper, int rowLength, int colLength)
@@ -115,8 +116,6 @@ namespace AdventOfCode.Day13
 
         private void ShowGrid(char[,] paper, int rowLength, int colLength)
         {
-            _testOutputHelper.WriteLine("------------");
-
             for (var row = 0; row <= rowLength; row++)
             {
                 var line = string.Empty;
@@ -127,8 +126,6 @@ namespace AdventOfCode.Day13
 
                 _testOutputHelper.WriteLine(line);
             }
-            
-            _testOutputHelper.WriteLine("------------");
         }
     }
 }
